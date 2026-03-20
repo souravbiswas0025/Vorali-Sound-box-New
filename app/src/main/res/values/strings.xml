@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">Vorali Soundbox</string>
+    <string name="volume_label">Alert Volume</string>
+    <string name="sound_choice_label">Choose Alert Sound:</string>
+    <string name="sound_bell">Classic Bell</string>
+    <string name="sound_whistle">Bird Whistle</string>
+    <string name="btn_permissions">Enable Notification Access</string>
+    <string name="status_waiting">Waiting for payments...</string>
+</resources>
