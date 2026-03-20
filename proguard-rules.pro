@@ -1,2 +1,0 @@
--keep class com.paybox.soundbox.** { *; }
--keepclassmembers class com.paybox.soundbox.** { *; }
