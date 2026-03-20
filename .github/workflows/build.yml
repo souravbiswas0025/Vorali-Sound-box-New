@@ -21,7 +21,7 @@ jobs:
           cache: gradle
 
       - name: Generate missing Gradle Wrapper
-        run: gradle wrapper --gradle-version 8.2.2
+        run: gradle wrapper --gradle-version 8.2
 
       - name: Grant execute permission for gradlew
         run: chmod +x ./gradlew
