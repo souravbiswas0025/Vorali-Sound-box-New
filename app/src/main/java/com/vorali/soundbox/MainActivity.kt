@@ -2,54 +2,41 @@ package com.vorali.soundbox
 
 import android.content.Context
 import android.content.Intent
-import android.content.SharedPreferences
 import android.os.Bundle
 import android.provider.Settings
 import android.widget.Button
 import android.widget.RadioGroup
-import android.widget.SeekBar
 import androidx.appcompat.app.AppCompatActivity
 
 class MainActivity : AppCompatActivity() {
-
-    private lateinit var prefs: SharedPreferences
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        prefs = getSharedPreferences("VoraliPrefs", Context.MODE_PRIVATE)
-
-        val btnPermissions = findViewById<Button>(R.id.btnPermissions)
-        val volumeSlider = findViewById<SeekBar>(R.id.volumeSlider)
-        val soundRadioGroup = findViewById<RadioGroup>(R.id.soundRadioGroup)
-
-        // Open Notification Listener Settings when clicked
-        btnPermissions.setOnClickListener {
+        val btnEnable = findViewById<Button>(R.id.btnEnableNotifications)
+        btnEnable.setOnClickListener {
             startActivity(Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS))
         }
 
-        // Load saved settings
-        volumeSlider.progress = prefs.getInt("volume", 100)
-        if (prefs.getString("sound", "bell") == "whistle") {
-            soundRadioGroup.check(R.id.radioWhistle)
-        } else {
-            soundRadioGroup.check(R.id.radioBell)
+        val rgLanguage = findViewById<RadioGroup>(R.id.rgLanguage)
+        val prefs = getSharedPreferences("VoraliPrefs", Context.MODE_PRIVATE)
+        
+        // Set the radio button to whatever you saved last (defaults to Bengali)
+        when (prefs.getString("language", "bn")) {
+            "bn" -> rgLanguage.check(R.id.rbBengali)
+            "hi" -> rgLanguage.check(R.id.rbHindi)
+            "en" -> rgLanguage.check(R.id.rbEnglish)
         }
 
-        // Save volume when changed
-        volumeSlider.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
-            override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
-                prefs.edit().putInt("volume", progress).apply()
+        // Save your choice the moment you tap a new language
+        rgLanguage.setOnCheckedChangeListener { _, checkedId ->
+            val editor = prefs.edit()
+            when (checkedId) {
+                R.id.rbBengali -> editor.putString("language", "bn")
+                R.id.rbHindi -> editor.putString("language", "hi")
+                R.id.rbEnglish -> editor.putString("language", "en")
             }
-            override fun onStartTrackingTouch(seekBar: SeekBar?) {}
-            override fun onStopTrackingTouch(seekBar: SeekBar?) {}
-        })
-
-        // Save sound choice when changed
-        soundRadioGroup.setOnCheckedChangeListener { _, checkedId ->
-            val soundChoice = if (checkedId == R.id.radioWhistle) "whistle" else "bell"
-            prefs.edit().putString("sound", soundChoice).apply()
+            editor.apply()
         }
     }
 }
