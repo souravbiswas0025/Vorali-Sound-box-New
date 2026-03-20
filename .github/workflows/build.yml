@@ -3,7 +3,10 @@ name: Build Vorali Soundbox APK
 on:
   push:
     branches: [ "main", "master" ]
-  workflow_dispatch: # This allows you to manually run the build from the Actions tab
+  workflow_dispatch: 
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 jobs:
   build:
