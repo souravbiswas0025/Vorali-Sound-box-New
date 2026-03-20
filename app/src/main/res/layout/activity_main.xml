@@ -4,70 +4,57 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:padding="24dp"
-    android:gravity="center_horizontal">
+    android:gravity="center">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/app_name"
-        android:textSize="28sp"
-        android:textStyle="bold"
-        android:layout_marginBottom="32dp" />
-
-    <Button
-        android:id="@+id/btnPermissions"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/btn_permissions"
-        android:backgroundTint="#4CAF50"
-        android:layout_marginBottom="32dp"/>
-
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/volume_label"
-        android:textSize="18sp" />
-
-    <SeekBar
-        android:id="@+id/volumeSlider"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:max="100"
-        android:progress="100"
+    <ImageView
+        android:layout_width="120dp"
+        android:layout_height="120dp"
+        android:src="@mipmap/ic_launcher"
         android:layout_marginBottom="24dp"/>
 
     <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Vorali Soundbox"
+        android:textSize="28sp"
+        android:textStyle="bold"
+        android:layout_marginBottom="32dp"/>
+
+    <Button
+        android:id="@+id/btnEnableNotifications"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/sound_choice_label"
-        android:textSize="18sp" />
-
-    <RadioGroup
-        android:id="@+id/soundRadioGroup"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="32dp">
-
-        <RadioButton
-            android:id="@+id/radioBell"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/sound_bell"
-            android:checked="true"/>
-
-        <RadioButton
-            android:id="@+id/radioWhistle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/sound_whistle" />
-    </RadioGroup>
+        android:text="Enable Notification Access"
+        android:layout_marginBottom="32dp"/>
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/status_waiting"
+        android:text="Select Announcement Language:"
         android:textSize="16sp"
-        android:textColor="#888888"
-        android:layout_marginTop="32dp"/>
+        android:textStyle="bold"
+        android:layout_marginBottom="12dp"/>
+
+    <RadioGroup
+        android:id="@+id/rgLanguage"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+        <RadioButton
+            android:id="@+id/rbBengali"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Bengali (বাংলা)"/>
+        <RadioButton
+            android:id="@+id/rbHindi"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Hindi (हिंदी)"/>
+        <RadioButton
+            android:id="@+id/rbEnglish"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="English"/>
+    </RadioGroup>
 
 </LinearLayout>
