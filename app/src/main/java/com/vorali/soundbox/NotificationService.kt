@@ -1,6 +1,7 @@
 package com.vorali.soundbox
 
 import android.content.Context
+import android.content.Intent
 import android.media.AudioAttributes
 import android.media.AudioManager
 import android.media.MediaPlayer
@@ -19,17 +20,47 @@ class NotificationService : NotificationListenerService(), TextToSpeech.OnInitLi
         tts = TextToSpeech(this, this)
     }
 
+    // This catches the signal from the Test Button
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        if (intent?.action == "com.vorali.soundbox.TEST_AUDIO") {
+            playAlertAndSpeak("150") // Plays a test amount of 150
+        }
+        return super.onStartCommand(intent, flags, startId)
+    }
+
     override fun onNotificationPosted(sbn: StatusBarNotification) {
-        if (sbn.packageName == "indwin.c3.shareapp") {
+        val prefs = getSharedPreferences("VoraliPrefs", Context.MODE_PRIVATE)
+        val pkg = sbn.packageName
+
+        // Check if the notification comes from an app you selected
+        val isAppEnabled = when (pkg) {
+            "indwin.c3.shareapp" -> prefs.getBoolean("app_slice", true)
+            "com.google.android.apps.nbu.paisa.user" -> prefs.getBoolean("app_gpay", true)
+            "com.phonepe.app" -> prefs.getBoolean("app_phonepe", true)
+            "net.one97.paytm" -> prefs.getBoolean("app_paytm", true)
+            "in.org.npci.upiapp" -> prefs.getBoolean("app_bhim", true)
+            "com.myairtelapp" -> prefs.getBoolean("app_airtel", true)
+            else -> false
+        }
+
+        if (isAppEnabled) {
             val extras = sbn.notification.extras
             val text = extras.getCharSequence("android.text")?.toString() ?: ""
+            val title = extras.getCharSequence("android.title")?.toString() ?: ""
+            val fullText = "$title $text"
             
+            // Extract the Rupee amount from the text
             val amountRegex = "₹\\s?([\\d,.]+)".toRegex()
-            val match = amountRegex.find(text)
+            val match = amountRegex.find(fullText)
             val amount = match?.groupValues?.get(1) ?: ""
 
-            if (amount.isNotEmpty()) {
-                playAlertAndSpeak(amount)
+            // Some apps like PhonePe might use 'Rs.' instead of the symbol
+            val amountRegexAlt = "Rs\\.?\\s?([\\d,.]+)".toRegex(RegexOption.IGNORE_CASE)
+            val matchAlt = amountRegexAlt.find(fullText)
+            val finalAmount = if (amount.isNotEmpty()) amount else (matchAlt?.groupValues?.get(1) ?: "")
+
+            if (finalAmount.isNotEmpty()) {
+                playAlertAndSpeak(finalAmount)
             }
         }
     }
@@ -37,8 +68,9 @@ class NotificationService : NotificationListenerService(), TextToSpeech.OnInitLi
     private fun playAlertAndSpeak(amount: String) {
         val prefs = getSharedPreferences("VoraliPrefs", Context.MODE_PRIVATE)
         val langChoice = prefs.getString("language", "bn") ?: "bn"
+        val customGreeting = prefs.getString("greeting", "দারুণ!") ?: ""
+        val customClosing = prefs.getString("closing", "ধন্যবাদ।") ?: ""
         
-        // Switch the voice engine language dynamically
         if (isTtsInitialized) {
             when (langChoice) {
                 "bn" -> tts.language = Locale("bn", "IN")
@@ -47,14 +79,13 @@ class NotificationService : NotificationListenerService(), TextToSpeech.OnInitLi
             }
         }
 
-        // Pick the correct personalized greeting
+        // Construct the personalized message based on your inputs
         val speechText = when (langChoice) {
-            "hi" -> "बढ़िया! सौरव, वोराली में $amount रुपये प्राप्त हुए।"
-            "en" -> "Great! Sourav, $amount rupees received on Vorali."
-            else -> "দারুণ! সৌরভ, ভোরালিতে $amount টাকা এসেছে।"
+            "hi" -> "$customGreeting, सौरव, वोराली में $amount रुपये प्राप्त हुए। $customClosing"
+            "en" -> "$customGreeting, Sourav, $amount rupees received on Vorali. $customClosing"
+            else -> "$customGreeting, সৌরভ, ভোরালিতে $amount টাকা এসেছে। $customClosing"
         }
 
-        // Force volume to 100%
         val audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
         val maxVolume = audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC)
         audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, maxVolume, 0)
@@ -81,8 +112,8 @@ class NotificationService : NotificationListenerService(), TextToSpeech.OnInitLi
     override fun onInit(status: Int) {
         if (status == TextToSpeech.SUCCESS) {
             isTtsInitialized = true
-            tts.setPitch(1.15f) // Lively pitch
-            tts.setSpeechRate(0.95f) // Clear pacing
+            tts.setPitch(1.2f) // Slightly higher, livelier pitch
+            tts.setSpeechRate(0.95f)
         }
     }
 
