@@ -1,60 +1,103 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:padding="24dp"
-    android:gravity="center">
+    android:padding="24dp">
 
-    <ImageView
-        android:layout_width="120dp"
-        android:layout_height="120dp"
-        android:src="@mipmap/ic_launcher"
-        android:layout_marginBottom="24dp"/>
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Vorali Soundbox"
-        android:textSize="28sp"
-        android:textStyle="bold"
-        android:layout_marginBottom="32dp"/>
-
-    <Button
-        android:id="@+id/btnEnableNotifications"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Enable Notification Access"
-        android:layout_marginBottom="32dp"/>
+        android:orientation="vertical"
+        android:gravity="center_horizontal">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Select Announcement Language:"
-        android:textSize="16sp"
-        android:textStyle="bold"
-        android:layout_marginBottom="12dp"/>
+        <ImageView
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:src="@mipmap/ic_launcher"
+            android:layout_marginBottom="16dp"/>
 
-    <RadioGroup
-        android:id="@+id/rgLanguage"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical">
-        <RadioButton
-            android:id="@+id/rbBengali"
+        <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Bengali (বাংলা)"/>
-        <RadioButton
-            android:id="@+id/rbHindi"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Hindi (हिंदी)"/>
-        <RadioButton
-            android:id="@+id/rbEnglish"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="English"/>
-    </RadioGroup>
+            android:text="Vorali Soundbox"
+            android:textSize="26sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="24dp"/>
 
-</LinearLayout>
+        <Button
+            android:id="@+id/btnEnableNotifications"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Enable Notification Access"
+            android:layout_marginBottom="24dp"/>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="1. Select Apps to Monitor:"
+            android:textStyle="bold"
+            android:layout_marginBottom="8dp"/>
+        
+        <GridLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:columnCount="2"
+            android:layout_marginBottom="16dp">
+            <CheckBox android:id="@+id/cbSlice" android:text="Slice" android:layout_width="0dp" android:layout_columnWeight="1"/>
+            <CheckBox android:id="@+id/cbGPay" android:text="Google Pay" android:layout_width="0dp" android:layout_columnWeight="1"/>
+            <CheckBox android:id="@+id/cbPhonePe" android:text="PhonePe" android:layout_width="0dp" android:layout_columnWeight="1"/>
+            <CheckBox android:id="@+id/cbPaytm" android:text="Paytm" android:layout_width="0dp" android:layout_columnWeight="1"/>
+            <CheckBox android:id="@+id/cbBhim" android:text="BHIM UPI" android:layout_width="0dp" android:layout_columnWeight="1"/>
+            <CheckBox android:id="@+id/cbAirtel" android:text="Airtel Pay" android:layout_width="0dp" android:layout_columnWeight="1"/>
+        </GridLayout>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="2. Customize Message:"
+            android:textStyle="bold"
+            android:layout_marginBottom="8dp"/>
+            
+        <EditText
+            android:id="@+id/etGreeting"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Start (e.g., Namaskar)"
+            android:layout_marginBottom="8dp"/>
+            
+        <EditText
+            android:id="@+id/etClosing"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="End (e.g., Thank you!)"
+            android:layout_marginBottom="24dp"/>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="3. Voice Language:"
+            android:textStyle="bold"
+            android:layout_marginBottom="8dp"/>
+
+        <RadioGroup
+            android:id="@+id/rgLanguage"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginBottom="32dp">
+            <RadioButton android:id="@+id/rbBengali" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="বাংলা "/>
+            <RadioButton android:id="@+id/rbHindi" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="हिंदी "/>
+            <RadioButton android:id="@+id/rbEnglish" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="English"/>
+        </RadioGroup>
+
+        <Button
+            android:id="@+id/btnTest"
+            android:layout_width="match_parent"
+            android:layout_height="70dp"
+            android:text="▶ PLAY TEST NOTIFICATION"
+            android:backgroundTint="#4CAF50"
+            android:textSize="18sp"
+            android:textStyle="bold"/>
+
+    </LinearLayout>
+</ScrollView>
