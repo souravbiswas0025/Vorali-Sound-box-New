@@ -24,11 +24,21 @@
             android:textStyle="bold"
             android:layout_marginBottom="24dp"/>
 
-        <Button
-            android:id="@+id/btnEnableNotifications"
+        <Switch
+            android:id="@+id/switchNotification"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Enable Notification Access"
+            android:text="Notification Access"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:padding="12dp"
+            android:layout_marginBottom="8dp"/>
+
+        <Button
+            android:id="@+id/btnBattery"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Bypass Battery Optimization"
             android:layout_marginBottom="24dp"/>
 
         <TextView
