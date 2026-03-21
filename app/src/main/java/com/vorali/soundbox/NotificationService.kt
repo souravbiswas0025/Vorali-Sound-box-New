@@ -20,10 +20,9 @@ class NotificationService : NotificationListenerService(), TextToSpeech.OnInitLi
         tts = TextToSpeech(this, this)
     }
 
-    // This catches the signal from the Test Button
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         if (intent?.action == "com.vorali.soundbox.TEST_AUDIO") {
-            playAlertAndSpeak("150") // Plays a test amount of 150
+            playAlertAndSpeak("150", "Aditi") 
         }
         return super.onStartCommand(intent, flags, startId)
     }
@@ -32,7 +31,6 @@ class NotificationService : NotificationListenerService(), TextToSpeech.OnInitLi
         val prefs = getSharedPreferences("VoraliPrefs", Context.MODE_PRIVATE)
         val pkg = sbn.packageName
 
-        // Check if the notification comes from an app you selected
         val isAppEnabled = when (pkg) {
             "indwin.c3.shareapp" -> prefs.getBoolean("app_slice", true)
             "com.google.android.apps.nbu.paisa.user" -> prefs.getBoolean("app_gpay", true)
@@ -49,23 +47,28 @@ class NotificationService : NotificationListenerService(), TextToSpeech.OnInitLi
             val title = extras.getCharSequence("android.title")?.toString() ?: ""
             val fullText = "$title $text"
             
-            // Extract the Rupee amount from the text
             val amountRegex = "₹\\s?([\\d,.]+)".toRegex()
             val match = amountRegex.find(fullText)
             val amount = match?.groupValues?.get(1) ?: ""
 
-            // Some apps like PhonePe might use 'Rs.' instead of the symbol
             val amountRegexAlt = "Rs\\.?\\s?([\\d,.]+)".toRegex(RegexOption.IGNORE_CASE)
             val matchAlt = amountRegexAlt.find(fullText)
             val finalAmount = if (amount.isNotEmpty()) amount else (matchAlt?.groupValues?.get(1) ?: "")
 
+            var senderName = ""
+            val nameRegex = "(?i)from\\s+([A-Za-z\\s]+?)(?:\\.|\\s*\\n|\\s+for|\\s+UPI|\\s+Ref|$)".toRegex()
+            val nameMatch = nameRegex.find(fullText)
+            if (nameMatch != null) {
+                senderName = nameMatch.groupValues[1].trim()
+            }
+
             if (finalAmount.isNotEmpty()) {
-                playAlertAndSpeak(finalAmount)
+                playAlertAndSpeak(finalAmount, senderName)
             }
         }
     }
 
-    private fun playAlertAndSpeak(amount: String) {
+    private fun playAlertAndSpeak(amount: String, senderName: String) {
         val prefs = getSharedPreferences("VoraliPrefs", Context.MODE_PRIVATE)
         val langChoice = prefs.getString("language", "bn") ?: "bn"
         val customGreeting = prefs.getString("greeting", "দারুণ!") ?: ""
@@ -79,11 +82,15 @@ class NotificationService : NotificationListenerService(), TextToSpeech.OnInitLi
             }
         }
 
-        // Construct the personalized message based on your inputs
+        // Added extra commas to force the engine to take natural, polite breaths
+        val namePartBn = if (senderName.isNotEmpty()) "$senderName এর কাছ থেকে, " else ""
+        val namePartHi = if (senderName.isNotEmpty()) "$senderName से, " else ""
+        val namePartEn = if (senderName.isNotEmpty()) "from $senderName, " else ""
+
         val speechText = when (langChoice) {
-            "hi" -> "$customGreeting, सौरव, वोराली में $amount रुपये प्राप्त हुए। $customClosing"
-            "en" -> "$customGreeting, Sourav, $amount rupees received on Vorali. $customClosing"
-            else -> "$customGreeting, সৌরভ, ভোরালিতে $amount টাকা এসেছে। $customClosing"
+            "hi" -> "$customGreeting, सौरव, $namePartHi वोराली में, $amount रुपये प्राप्त हुए। $customClosing"
+            "en" -> "$customGreeting, Sourav, $amount rupees received, $namePartEn on Vorali. $customClosing"
+            else -> "$customGreeting, সৌরভ, $namePartBn ভোরালিতে, $amount টাকা এসেছে। $customClosing"
         }
 
         val audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
@@ -112,8 +119,9 @@ class NotificationService : NotificationListenerService(), TextToSpeech.OnInitLi
     override fun onInit(status: Int) {
         if (status == TextToSpeech.SUCCESS) {
             isTtsInitialized = true
-            tts.setPitch(1.2f) // Slightly higher, livelier pitch
-            tts.setSpeechRate(0.95f)
+            // Brought pitch down to a natural human level (1.05) and slowed the rate (0.90) for clarity
+            tts.setPitch(1.05f) 
+            tts.setSpeechRate(0.90f)
         }
     }
 
