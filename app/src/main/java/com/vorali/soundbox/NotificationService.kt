@@ -22,7 +22,8 @@ class NotificationService : NotificationListenerService(), TextToSpeech.OnInitLi
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         if (intent?.action == "com.vorali.soundbox.TEST_AUDIO") {
-            playAlertAndSpeak("150", "Aditi") 
+            // Added the "isTest" flag so it announces itself as a test
+            playAlertAndSpeak("150", "Aditi", isTest = true) 
         }
         return super.onStartCommand(intent, flags, startId)
     }
@@ -47,6 +48,16 @@ class NotificationService : NotificationListenerService(), TextToSpeech.OnInitLi
             val title = extras.getCharSequence("android.title")?.toString() ?: ""
             val fullText = "$title $text"
             
+            // --- SPAM FILTER: Ignore marketing, loans, and cashback offers ---
+            val lowerText = fullText.lowercase()
+            if (lowerText.contains("cashback") || 
+                lowerText.contains("loan") || 
+                lowerText.contains("offer") || 
+                lowerText.contains("reward") || 
+                lowerText.contains("win")) {
+                return // Stop immediately, do not play sound
+            }
+
             val amountRegex = "₹\\s?([\\d,.]+)".toRegex()
             val match = amountRegex.find(fullText)
             val amount = match?.groupValues?.get(1) ?: ""
@@ -55,20 +66,26 @@ class NotificationService : NotificationListenerService(), TextToSpeech.OnInitLi
             val matchAlt = amountRegexAlt.find(fullText)
             val finalAmount = if (amount.isNotEmpty()) amount else (matchAlt?.groupValues?.get(1) ?: "")
 
+            // --- UPGRADED NAME SCANNER: Catches both "from" and "by" ---
             var senderName = ""
-            val nameRegex = "(?i)from\\s+([A-Za-z\\s]+?)(?:\\.|\\s*\\n|\\s+for|\\s+UPI|\\s+Ref|$)".toRegex()
+            // Looks for "from" or "by" followed by up to 3 words, ignoring numbers and punctuation
+            val nameRegex = "(?i)(?:from|by)\\s+([A-Za-z]+(?:\\s+[A-Za-z]+){0,2})".toRegex()
             val nameMatch = nameRegex.find(fullText)
             if (nameMatch != null) {
-                senderName = nameMatch.groupValues[1].trim()
+                // Clean up any stray words that might accidentally get grabbed
+                val extracted = nameMatch.groupValues[1].trim()
+                if (!extracted.equals("UPI", ignoreCase = true) && !extracted.equals("wallet", ignoreCase = true)) {
+                    senderName = extracted
+                }
             }
 
             if (finalAmount.isNotEmpty()) {
-                playAlertAndSpeak(finalAmount, senderName)
+                playAlertAndSpeak(finalAmount, senderName, isTest = false)
             }
         }
     }
 
-    private fun playAlertAndSpeak(amount: String, senderName: String) {
+    private fun playAlertAndSpeak(amount: String, senderName: String, isTest: Boolean) {
         val prefs = getSharedPreferences("VoraliPrefs", Context.MODE_PRIVATE)
         val langChoice = prefs.getString("language", "bn") ?: "bn"
         val customGreeting = prefs.getString("greeting", "দারুণ!") ?: ""
@@ -82,15 +99,23 @@ class NotificationService : NotificationListenerService(), TextToSpeech.OnInitLi
             }
         }
 
-        // Added extra commas to force the engine to take natural, polite breaths
+        // Test Announcement Prefix
+        val testPrefix = if (isTest) {
+            when (langChoice) {
+                "hi" -> "यह एक टेस्ट है। "
+                "en" -> "This is a test notification. "
+                else -> "এটি একটি টেস্ট নোটিফিকেশন। "
+            }
+        } else ""
+
         val namePartBn = if (senderName.isNotEmpty()) "$senderName এর কাছ থেকে, " else ""
         val namePartHi = if (senderName.isNotEmpty()) "$senderName से, " else ""
         val namePartEn = if (senderName.isNotEmpty()) "from $senderName, " else ""
 
         val speechText = when (langChoice) {
-            "hi" -> "$customGreeting, सौरव, $namePartHi वोराली में, $amount रुपये प्राप्त हुए। $customClosing"
-            "en" -> "$customGreeting, Sourav, $amount rupees received, $namePartEn on Vorali. $customClosing"
-            else -> "$customGreeting, সৌরভ, $namePartBn ভোরালিতে, $amount টাকা এসেছে। $customClosing"
+            "hi" -> "$testPrefix$customGreeting, सौरव, $namePartHi वोराली में, $amount रुपये प्राप्त हुए। $customClosing"
+            "en" -> "$testPrefix$customGreeting, Sourav, $amount rupees received, $namePartEn on Vorali. $customClosing"
+            else -> "$testPrefix$customGreeting, সৌরভ, $namePartBn ভোরালিতে, $amount টাকা এসেছে। $customClosing"
         }
 
         val audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
@@ -119,7 +144,6 @@ class NotificationService : NotificationListenerService(), TextToSpeech.OnInitLi
     override fun onInit(status: Int) {
         if (status == TextToSpeech.SUCCESS) {
             isTtsInitialized = true
-            // Brought pitch down to a natural human level (1.05) and slowed the rate (0.90) for clarity
             tts.setPitch(1.05f) 
             tts.setSpeechRate(0.90f)
         }
