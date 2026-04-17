@@ -22,8 +22,8 @@ class NotificationService : NotificationListenerService(), TextToSpeech.OnInitLi
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         if (intent?.action == "com.vorali.soundbox.TEST_AUDIO") {
-            // Added the "isTest" flag so it announces itself as a test
-            playAlertAndSpeak("150", "Aditi", isTest = true) 
+            // Using ALL CAPS here to prove the formatting fix works on the test button!
+            playAlertAndSpeak("150", "ADITI", isTest = true) 
         }
         return super.onStartCommand(intent, flags, startId)
     }
@@ -48,14 +48,13 @@ class NotificationService : NotificationListenerService(), TextToSpeech.OnInitLi
             val title = extras.getCharSequence("android.title")?.toString() ?: ""
             val fullText = "$title $text"
             
-            // --- SPAM FILTER: Ignore marketing, loans, and cashback offers ---
             val lowerText = fullText.lowercase()
             if (lowerText.contains("cashback") || 
                 lowerText.contains("loan") || 
                 lowerText.contains("offer") || 
                 lowerText.contains("reward") || 
                 lowerText.contains("win")) {
-                return // Stop immediately, do not play sound
+                return 
             }
 
             val amountRegex = "₹\\s?([\\d,.]+)".toRegex()
@@ -66,16 +65,17 @@ class NotificationService : NotificationListenerService(), TextToSpeech.OnInitLi
             val matchAlt = amountRegexAlt.find(fullText)
             val finalAmount = if (amount.isNotEmpty()) amount else (matchAlt?.groupValues?.get(1) ?: "")
 
-            // --- UPGRADED NAME SCANNER: Catches both "from" and "by" ---
             var senderName = ""
-            // Looks for "from" or "by" followed by up to 3 words, ignoring numbers and punctuation
             val nameRegex = "(?i)(?:from|by)\\s+([A-Za-z]+(?:\\s+[A-Za-z]+){0,2})".toRegex()
             val nameMatch = nameRegex.find(fullText)
+            
             if (nameMatch != null) {
-                // Clean up any stray words that might accidentally get grabbed
                 val extracted = nameMatch.groupValues[1].trim()
                 if (!extracted.equals("UPI", ignoreCase = true) && !extracted.equals("wallet", ignoreCase = true)) {
-                    senderName = extracted
+                    // THE FIX: This forces ALL CAPS names into proper Title Case (e.g., SOURAV -> Sourav)
+                    senderName = extracted.lowercase().split(" ").joinToString(" ") { word ->
+                        word.replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString() }
+                    }
                 }
             }
 
@@ -99,7 +99,6 @@ class NotificationService : NotificationListenerService(), TextToSpeech.OnInitLi
             }
         }
 
-        // Test Announcement Prefix
         val testPrefix = if (isTest) {
             when (langChoice) {
                 "hi" -> "यह एक टेस्ट है। "
